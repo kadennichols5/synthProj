@@ -1,0 +1,166 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2820
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 Helvetica-Bold;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww24560\viewh13060\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs36 \cf0 Project Brainstorm
+\fs24 \
+\
+
+\f1\b \ul Important Thoughts \
+\
+
+\f0\b0 \ulnone Define sets in time and space domains (frames, etc. )\
+\
+Changing between shape domain and time domain should be invariant. Can look from time or step into spaces between stems. \
+\
+Going to build a consistent notation to better keep track of bytes, stems, time, any other dimension. May end up being similar to tensor notation.\
+Will require a concrete hierarchy of components (BST?) eg. Byte < Stem < Song\
+\
+Is the visual a set of geometric waveforms or are the visuals a composition of discreet shapes in space?\
+					- Are these shapes closed form?\
+\
+\
+How to build/describe the time coordinate plane?\
+\
+Maybe 3 frames to consider: memory snapshot, current snapshot, prediction snapshot\
+Is POV_o set at t=0 with an even spread of t on either side? \
+Does origin exist from t=0 to t' (looking forward in time), t=0 as midpoint of t= +- t', etc\
+I think I want to describe the case where I am unbiased and can shift between prediction and memory without shifting-looking head on so to speak, not leaning one way and looking the other. \
+\
+Individual, isolated sounds that are instantaneous and solitary are restricted to a set where they are the only element unless they appear as a layer in a song. In the latter case they would appear as a single object in the time and space domain alone with any other wave forms captured in the frame. [THIS IDEA IS CONVOLUTED BUT IS EASIER TO DESCRIBE AND VISUALIZE THAN I AM MAKING IT]\
+\
+\
+The instances of beats can be used to capture frames. \
+\
+I think that the time domain will be the domain concerned with the actual visualization and creation of frame sets,\
+Space domain will use function to build waves in parallel and map to time domain on correct time slice. May be helpful to track beats as unit\
+\
+May want to standardize to listening device ie my Sony headphones w normal settings. \
+\
+
+\f1\b\fs36 \ul Notation
+\f0\b0\fs24 \ulnone \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f1\b \cf0 (Time 
+\f0\b0 denoted by t)\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+
+\f1\b Time domain
+\f0\b0 : looking at wave form of sounds in units of t. View of frame which may or may not be symmetric about t = 0. May be used to consider the waves observed in frames as discreet evolutions. \
+\
+
+\f1\b Space domain
+\f0\b0 : looking at wave forms along geometry of stems not considering time. These shapes are assembled linearly in time but need not be at t == 0. This frame follows actual trajectories of shape wave form. Possible that the wave forms are continuous in this domain, long as invariant into and from time domain. \
+\
+
+\f1\b Stem:
+\f0\b0  the component wave of individual shapes which I visualize. Bass stem, vocal stem, guitars, hi-hats, etc. (maybe have stem notation with unique subscript as it pertains) [see Sub Wave]\
+ \
+
+\f1\b Beats: 
+\f0\b0 Beats help in building the geometries of a stem and may actually be what defines the time domain. (Denoted with b_)\
+\
+
+\f1\b Bytes: 
+\f0\b0 describes points along the stems. Unspecified as to peak trough etc, but will probably have a time notation and stem notation (t, ). Unit in the space domain. May be analogous to a beat, possibly unit of conversion between time and space domains. (\
+\
+
+\f1\b POV/snapshot:
+\f0\b0  The POV is the snapshot I am considering. As of now could be the memory POV, present POV, prediction POV [may swap frame and snapshot to describe the cross section]\
+\
+
+\f1\b Layer:
+\f0\b0   A sub wave element as it exists in space domain. This will determine how the sounds are visualized on each other in frame. eg. There are layers of the sound  \
+\
+
+\f1\b Space:
+\f0\b0  I consider the space (not immediately pertinent to the domain) to be some abstraction of the distance between the layers. I expect to define this during this project.  \
+\
+
+\f1\b Frame: 
+\f0\b0 the frame is the cross section of the wave form I consider in any POV. A mental picture, so to speak. \
+\
+
+\f1\b Sub Wave: 
+\f0\b0 Adding this to better describe the individual wave form. Sub waves in a frame in time domaine are the individual wave forms and shapes. Sounds need not be continuous, boop and beep exist as individual shapes. Stem, time notation\
+ \
+
+\f1\b Wave: 
+\f0\b0 In time domain, the set of sub waves between t_1, t_2 when viewed in frame is the wave.\
+	 In space domain, the term may be used interchangeably with sub-wave in the event that we are only considering a specific subwave. \
+\
+
+\f1\b\fs36 \ul Abstract\
+
+\f0\b0\fs24 \ulnone \
+\
+I create a visual representation of sounds when I hear them. More than not, they appear to be some 2D or 3D shape/structure/space with consistency. Let's consider music, for example. When I listen to music, I visualize the song as a set of shapes which evolves over time.  Essentially, I visualize a wave form of shapes which is apparent in real time as a song is played. I can describe this wave form in a time domain but also in what I would consider to be a physical analysis of the song in space (ie space domain). \
+\
+\
+\
+
+\f1\b Time domain:
+\f0\b0 \
+\
+- While listening to music, there is a frame which appears in real time as the song plays similar to a frame on a computer screen. Observing in this frame, one is aware of a set of waves which exist from some [t_1, t_2]. This frame may be defined by the timing of beats in the song, and the set of sub-waves being the objects captured. \{interesting to consider for organizational purposes, as this frame being a discreet object which evolves to a new frame\} \
+\
+- Observing wave at some t where t_1 <= t <= t_2\
+\
+- Frame in time domain captures wave form as a continuous object between two beats, b_l and b_r where b_l and b_r are beats at t = t_l = t_1 and t_r = t _2, respectively. \
+\
+- A frame will evolve as a live \
+\
+****** Want to define the time domain rigorously such that:\
+		- A frame can be described as a \'93Live Photo\'94 where the elements may evolve within frame\
+		- A frame is a set of points in time as  [t_l, t_r] with elements denoted t_l, t_(l+1),t_(l+2), \'85, t_(r-1), t_r \
+		- The elements (timestamps) in a frame set map to a visual encoding of the audio  (may have to do this individually and impose on to each other bc function)\
+		- The visual encodings may range from a single shape in space as it appears, in the case of an instantaneous sound, or something resembling rigid 2d/3d objects in percussion, etc. \
+		- A set of frames from t=0 to t = t_(r,n) is a closed set that encodes the audio from t=0 to t= t_(r,n) with elements being frames which exist from t = [t_0, t_r,1],\'85[t_(l, n-1), t_(r, n-1)], [[t_(l, n), t_(r, n)]]\
+\
+\
+
+\f1\b Space Domain: (programmatically may have to run parallel w/ ^ to help map in time domain)\
+
+\f0\b0 \
+For starters, I will want to define this space as rigorously as possible. Unsure yet as to unit assumptions other than direction of time is a general assumption. \
+\
+- The space domain exists for the length of an audio input. It consists of a single frame which exists from t=0 until t=t_f\
+\
+- Bytes are segments of waves in the space domain with a time index and wave index. The time index of a byte may be written as time or with beat notation (t, b respectively)\
+\
+- Byte notation time index may be t\'92= t_2-t_1 = delta(Time)\
+- Bytes can be instantaneous or continuous \
+	- instantaneous: p_ (t\'92=0, w=0; \
+\
+\
+Space domain  -> set of bytes \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 - In this space, observer can iterate between wave forms and consider the space within them as they are layered, not concerning with time other than \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0    \{Will write in terms of individual songs for clarity in the following.\} \
+\
+\
+
+\f1\b \ul Description of Sounds: \
+
+\f0\b0 \ulnone \
+\
+
+\f1\b Synth (maybe guitar):\
+\
+Base:
+\f0\b0 \
+\
+\
+I think I'll end up having to create a set of rules (how definitive, tbd) to convert sounds into objects with a volume quality to them. Some combination of pitch, tempo, depth , texture, :length of beat?" \
+What are some characteristics/components of sound that can best be used to describe the shapes?\
+Considering percussion / base structure would be ideal for the definition of this. \
+Then thinner sounds could end up lacking all but some combination of the dimensionality that is present in bass sound\
+}
