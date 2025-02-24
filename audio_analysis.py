@@ -149,17 +149,47 @@ class AudioSeparator:
 
         except subprocess.CalledProcessError as e:
             print(f"Error during Demucs processing: {e.stderr}")
-            raise
-        except Exception as e:
-            print(f"Error during separation: {str(e)}")
-            raise
-
-        except subprocess.CalledProcessError as e:
-            print(f"Error during Demucs processing: {e.stderr}")
         except FileNotFoundError:
             print("Error: File not found. Check to make sure file path exists.")
 
-
+    def batch_separate_audio(self, input_directory):
+        """
+        Separates multiple audio files from a directory.
+        
+        Args:
+            input_directory (str): Directory containing audio files to process
+            
+        Returns:
+            dict: Dictionary mapping track names to their separated stems
+        """
+        if not os.path.exists(input_directory):
+            raise FileNotFoundError(f"Input directory not found: {input_directory}")
+            
+        results = {}
+        
+        # Get all MP3 files in the directory
+        audio_files = [f for f in os.listdir(input_directory) if f.endswith('.mp3')]
+        
+        for audio_file in audio_files:
+            print(f"\nProcessing: {audio_file}")
+            
+            # Update paths for this file
+            self.input_path = os.path.join(input_directory, audio_file)
+            track_output = os.path.join(self.output_path, os.path.splitext(audio_file)[0])
+            
+            try:
+                stems = self.separate_audio()
+                results[audio_file] = stems
+                print(f"Successfully separated: {audio_file}")
+            except Exception as e:
+                print(f"Error processing {audio_file}: {str(e)}")
+                continue
+                
+        return results
             
 
 
+
+separator = AudioSeparator(input_path="", output_path="batch_separated_output")
+results = separator.batch_separate_audio("RawAudioFiles")
+print(results)

@@ -79,3 +79,38 @@ class TestAudioSeparator:
         with pytest.raises(FileNotFoundError):
             separator = AudioSeparator("nonexistent.mp3", "output")
             separator.separate_audio()
+
+    def test_batch_separation(self, test_tracks):
+        """Test separation of multiple tracks"""
+        # Get the directory containing test tracks
+        input_dir = os.path.dirname(test_tracks[0])
+        
+        separator = AudioSeparator(
+            input_path="",  # Will be set per file
+            output_path="batch_separated_output"
+        )
+        
+        try:
+            results = separator.batch_separate_audio(input_dir)
+            
+            # Verify results
+            assert len(results) > 0, "No tracks were processed"
+            
+            # Check if all test tracks were processed
+            expected_files = [os.path.basename(track) for track in test_tracks]
+            for file_name in expected_files:
+                assert file_name in results, f"Missing results for {file_name}"
+                
+            # Check output directory structure
+            for track_name in results:
+                base_name = os.path.splitext(track_name)[0]
+                model_dir = os.path.join("batch_separated_output", "mdx_extra_q", base_name)
+                
+                # Check for stem files
+                for stem in ['vocals', 'drums', 'bass', 'other']:
+                    stem_path = os.path.join(model_dir, f"{stem}.mp3")
+                    assert os.path.exists(stem_path), f"Missing {stem} for {track_name}"
+                    assert os.path.getsize(stem_path) > 0, f"Empty {stem} file for {track_name}"
+                    
+        except Exception as e:
+            pytest.fail(f"Batch separation failed with error: {str(e)}")

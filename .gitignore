@@ -1,3 +1,6 @@
 .venv/
 
 /RawAudioFiles/*.mp3
+
+/batch_separated_output/*
+/separated_output/*
