@@ -1,6 +1,34 @@
 .venv/
 
 /RawAudioFiles/*.mp3
-
+/RawAudioFiles
 /batch_separated_output/*
 /separated_output/*
+/.pytest_cache/*
+
+
+
+
+# Python package artifacts
+*.egg-info/
+*.egg
+dist/
+build/
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Output files
+separated_output/
+batch_separated_output/
+
+# System files
+.DS_Store
