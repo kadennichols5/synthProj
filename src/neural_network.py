@@ -22,73 +22,73 @@ class VisualEncoder(nn.Module):
                             f"to accommodate time ({self.time_dim}) and stem ({self.stem_dim}) dimensions")
         
         # Output dimensions
-        self.shape_dim = 6
-        self.motion_dim = 6
-        self.texture_dim = 8
-        self.color_dim = 4
-        self.brightness_dim = 1
-        self.position_dim = 3
-        self.pattern_dim = 6
+        self.shape_dim = 6 # shape category output
+        self.motion_dim = 6 # velocity and acceleration output
+        self.texture_dim = 8 # texture parameters output
+        self.color_dim = 4 # color parameters output - RGBA
+        self.brightness_dim = 1 # brightness scalar output
+        self.position_dim = 3 # position output - XYZ
+        self.pattern_dim = 6 # pattern category output
         
         # Build encoder layers
         layers = []
         prev_dim = input_dim
         for hidden_dim in hidden_dims:
             layers.extend([
-                nn.Linear(prev_dim, hidden_dim),
-                nn.LayerNorm(hidden_dim),
-                nn.LeakyReLU(),
-                nn.Dropout(0.2)
+                nn.Linear(prev_dim, hidden_dim), # fully connected layer
+                nn.LayerNorm(hidden_dim), # normalize activations for stable training
+                nn.LeakyReLU(), # leaky relu activation function (helps with gradient flow)
+                nn.Dropout(0.2) # dropout layer to prevent overfitting (ie randomly drop out 20% of neurons)
             ])
             prev_dim = hidden_dim
             
-        self.encoder = nn.Sequential(*layers)
+        self.encoder = nn.Sequential(*layers) # sequential container of layers
         
         # Latent space
-        self.fc_latent = nn.Linear(hidden_dims[-1], latent_dim)
+        self.fc_latent = nn.Linear(hidden_dims[-1], latent_dim) # fully connected layer to reduce dimensionality
         
         # Decoder heads for each visual parameter
         self.shape_head = nn.Sequential(
-            nn.Linear(latent_dim, self.shape_dim),
+            nn.Linear(latent_dim, self.shape_dim), # fully connected layer to output shape categories
             nn.Softmax(dim=-1)  # For shape categories
         )
         
         self.motion_head = nn.Sequential(
-            nn.Linear(latent_dim, self.motion_dim),
+            nn.Linear(latent_dim, self.motion_dim), # fully connected layer to output velocity and acceleration
             nn.Tanh()  # For velocity and acceleration
         )
         
         self.texture_head = nn.Sequential(
-            nn.Linear(latent_dim, self.texture_dim),
+            nn.Linear(latent_dim, self.texture_dim), # fully connected layer to output texture parameters
             nn.Sigmoid()  # For texture parameters
         )
         
         self.color_head = nn.Sequential(
-            nn.Linear(latent_dim, self.color_dim),
+            nn.Linear(latent_dim, self.color_dim), # fully connected layer to output color parameters
             nn.Sigmoid()  # For RGBA values
         )
         
         self.brightness_head = nn.Sequential(
-            nn.Linear(latent_dim, self.brightness_dim),
+            nn.Linear(latent_dim, self.brightness_dim), # fully connected layer to output brightness scalar
             nn.Sigmoid()  # For brightness scalar
         )
         
         self.position_head = nn.Sequential(
-            nn.Linear(latent_dim, self.position_dim),
+            nn.Linear(latent_dim, self.position_dim), # fully connected layer to output position
             nn.Tanh()  # For XYZ coordinates
         )
         
         self.pattern_head = nn.Sequential(
-            nn.Linear(latent_dim, self.pattern_dim),
+            nn.Linear(latent_dim, self.pattern_dim), # fully connected layer to output pattern categories       
             nn.Softmax(dim=-1)  # For pattern categories
         )
 
     def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
         # Encode input
-        encoded = self.encoder(x)
-        latent = self.fc_latent(encoded)
+        encoded = self.encoder(x) # pass input through encoder
+        latent = self.fc_latent(encoded) # reduce dimensionality of encoded input   
         
-        # Generate visual parameters
+        # Generate visual parameters - output of each head is a tensor of shape (batch_size, 1)
         return {
             'shape': self.shape_head(latent),
             'motion': self.motion_head(latent),
