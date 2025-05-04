@@ -6,8 +6,9 @@
 /separated_output/*
 /.pytest_cache/*
 music samples/*
-
-
+BassVocalDrumGuitar
+gb_MusicSplit
+docs/*
 
 # Python package artifacts
 *.egg-info/
