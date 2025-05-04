@@ -32,4 +32,4 @@ separated_output/
 batch_separated_output/
 
 # System files
-.DS_Store
+/.DS_Store
