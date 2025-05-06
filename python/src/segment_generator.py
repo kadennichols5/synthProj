@@ -36,20 +36,22 @@ def extract_segments(audio_path, segment_len_ms = 5000, stride_ms = 2000, random
         segment_id += 1
     
     #building randomly generated segments
-    num_random_segments = int(len(sym_segments*random_ratio))
+    num_random_segments = int(len(sym_segments) * random_ratio)
     used_windows = set()
 
     for n in range(num_random_segments):
         max_attempts = 10
-        for n in range(max_attempts):
+        for attempt in range(max_attempts):
             rand_len = random.randint(*random_len_range)
+            # pick a random start so the segment fits in the audio
+            start = random.randint(0, audio_duration_ms - rand_len)
             end = start + rand_len
 
             # avoiding too much overlap of existing symmetric segments
-            if not any(abs(start - sym_start) < 600 for (sym_start, n) in sym_segments):
+            if not any(abs(start - sym_start) < 600 for (sym_start, _) in sym_segments):
                 segment = audio[start:end]
                 out_path = os.path.join(output_dir, f"{base_name}_rndm_{segment_id:04d}.wav")
-                segment.export(out_path, format = 'wav')
+                segment.export(out_path, format='wav')
                 metadata.append({
                     "filename": out_path,
                     "type": "random",
@@ -60,11 +62,24 @@ def extract_segments(audio_path, segment_len_ms = 5000, stride_ms = 2000, random
                 segment_id += 1
                 break
 
-#save metadata
-    metadata_path = os.path.join(output_dir)
+    # save metadata
+    metadata_path = os.path.join(output_dir, f"{base_name}_metadata.json")
     with open(metadata_path, "w") as f:
-            json.dump(metadata, f, indent=2)
-            print(f"Saved {segment_id} segments and metadata to {output_dir}")
+        json.dump(metadata, f, indent=2)
+    print(f"Saved {segment_id} segments and metadata to {output_dir}")
+
+# --- Process all files in the input directory ---
+
+if __name__ == "__main__":
+    output_dir = "/Users/kadensnichols/Desktop/synthProj/segmented_audio"
+    os.makedirs(output_dir, exist_ok=True)
+
+    input_dir = "/Users/kadensnichols/Desktop/synthProj/BassVocalDrumGuitar"
+    audio_files = [f for f in os.listdir(input_dir) if f.endswith(('.wav', '.mp3'))]
+
+    for filename in audio_files:
+        audio_path = os.path.join(input_dir, filename)
+        extract_segments(audio_path, output_dir=output_dir)
 
 
 

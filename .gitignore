@@ -9,6 +9,13 @@ music samples/*
 BassVocalDrumGuitar
 gb_MusicSplit
 docs/*
+segmented_audio/*
+segmented_stems/*
+cleaned_songs.json
+separated_files.txt
+separation.log
+separated/*
+spectral_data/*
 
 # Python package artifacts
 *.egg-info/
