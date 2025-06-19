@@ -2,6 +2,9 @@ import os
 import json
 import numpy as np
 import random
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'config'))
+from paths import get_segmented_audio_path
 from pydub import AudioSegment
 
 """
@@ -71,7 +74,7 @@ def extract_segments(audio_path, segment_len_ms = 5000, stride_ms = 2000, random
 # --- Process all files in the input directory ---
 
 if __name__ == "__main__":
-    output_dir = "/Users/kadensnichols/Desktop/synthProj/segmented_audio"
+    output_dir = get_segmented_audio_path()
     os.makedirs(output_dir, exist_ok=True)
 
     input_dir = "/Users/kadensnichols/Desktop/synthProj/BassVocalDrumGuitar"

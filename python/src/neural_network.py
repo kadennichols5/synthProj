@@ -22,13 +22,13 @@ class VisualEncoder(nn.Module):
                             f"to accommodate time ({self.time_dim}) and stem ({self.stem_dim}) dimensions")
         
         # Output dimensions
-        self.shape_dim = 6 # shape category output
-        self.motion_dim = 6 # velocity and acceleration output
-        self.texture_dim = 8 # texture parameters output
-        self.color_dim = 4 # color parameters output - RGBA
-        self.brightness_dim = 1 # brightness scalar output
-        self.position_dim = 3 # position output - XYZ
-        self.pattern_dim = 6 # pattern category output
+        self.shape_dim = 6 # shape 
+        self.motion_dim = 6 # velocity and acceleration 
+        self.texture_dim = 8 # texture 
+        self.color_dim = 4 # color  - RGBA
+        self.brightness_dim = 1 # brightness 
+        self.position_dim = 3 # position - XYZ
+        self.pattern_dim = 6 # pattern [category] 
         
         # Build encoder layers
         layers = []

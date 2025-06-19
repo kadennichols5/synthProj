@@ -1,6 +1,9 @@
 import os
 import json
 import numpy as np
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'config'))
+from paths import get_segmented_stems_path, get_spectral_data_path
 from spectral_analysis import ByteExtractor
 from typing import Dict, List
 import soundfile as sf
@@ -107,8 +110,8 @@ def process_segmented_stems(input_dir: str, output_dir: str):
 
 if __name__ == "__main__":
     # Define input and output directories
-    input_dir = "/Users/kadensnichols/Desktop/synthProj/segmented_stems"
-    output_dir = "/Users/kadensnichols/Desktop/synthProj/spectral_data"
+    input_dir = get_segmented_stems_path()
+    output_dir = get_spectral_data_path()
     
     # Process all segmented stems
     process_segmented_stems(input_dir, output_dir) 

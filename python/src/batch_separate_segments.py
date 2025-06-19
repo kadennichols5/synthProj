@@ -1,8 +1,11 @@
 import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'config'))
+from paths import get_segmented_audio_path, get_segmented_stems_path
 from audio_separation import AudioSeparator
 
-segmented_dir = "/Users/kadensnichols/Desktop/synthProj/segmented_audio"
-output_dir = "/Users/kadensnichols/Desktop/synthProj/segmented_stems"
+segmented_dir = get_segmented_audio_path()
+output_dir = get_segmented_stems_path()
 os.makedirs(output_dir, exist_ok=True)
 
 # Log file to keep track of processed files
