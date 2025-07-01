@@ -146,37 +146,59 @@ class UnsupervisedVisualEncoder(VisualEncoder):
                          input_sequence: torch.Tensor,
                          weights: Dict[str, float] = None) -> torch.Tensor:
         """
-        Unsupervised loss based on:
-        1. Temporal consistency
-        2. Spectral energy correlation
-        3. Perceptual smoothness
-        4. Physical constraints
+        Simple unsupervised loss for initial training.
+        Focus on basic constraints and preventing collapse.
         """
         if weights is None:
             weights = {
-                'temporal': 1.0,
-                'spectral': 0.5,
-                'smoothness': 0.3,
-                'physics': 0.2
+                'constraints': 1.0,
+                'diversity': 0.5
             }
             
-        # Temporal consistency loss
-        temporal_loss = self.temporal_consistency_loss(outputs)
+        # Basic constraints loss (keep parameters in valid ranges)
+        constraints_loss = self.basic_constraints_loss(outputs)
         
-        # Spectral correlation loss
-        spectral_loss = self.spectral_correlation_loss(outputs, input_sequence)
-        
-        # Smoothness loss
-        smoothness_loss = self.smoothness_loss(outputs)
-        
-        # Physical constraints loss
-        physics_loss = self.physics_constraints_loss(outputs)
+        # Diversity loss (prevent all outputs from being the same)
+        diversity_loss = self.simple_diversity_loss(outputs)
         
         total_loss = (
-            weights['temporal'] * temporal_loss +
-            weights['spectral'] * spectral_loss +
-            weights['smoothness'] * smoothness_loss +
-            weights['physics'] * physics_loss
+            weights['constraints'] * constraints_loss +
+            weights['diversity'] * diversity_loss
         )
         
         return total_loss
+    
+    def basic_constraints_loss(self, outputs: Dict[str, torch.Tensor]) -> torch.Tensor:
+        """Basic constraints to keep parameters in valid ranges."""
+        constraint_losses = []
+        
+        # Color constraints: RGBA values should be in [0, 1]
+        color = outputs['color']
+        color_constraint = torch.mean(torch.relu(color - 1.0) + torch.relu(-color))
+        constraint_losses.append(color_constraint)
+        
+        # Brightness constraints: should be in [0, 1]
+        brightness = outputs['brightness']
+        brightness_constraint = torch.mean(torch.relu(brightness - 1.0) + torch.relu(-brightness))
+        constraint_losses.append(brightness_constraint)
+        
+        # Position constraints: reasonable 3D space bounds
+        position = outputs['position']
+        position_constraint = torch.mean(torch.relu(torch.abs(position) - 2.0))
+        constraint_losses.append(position_constraint)
+        
+        return torch.mean(torch.stack(constraint_losses))
+    
+    def simple_diversity_loss(self, outputs: Dict[str, torch.Tensor]) -> torch.Tensor:
+        """Simple diversity loss to prevent collapse."""
+        diversity_losses = []
+        
+        for param_name, param_tensor in outputs.items():
+            if param_tensor.shape[0] > 1:
+                # Calculate variance across batch
+                variance = torch.var(param_tensor, dim=0)
+                # Penalize very low variance
+                diversity_loss = torch.mean(torch.exp(-variance * 10))  # Scaled for better gradients
+                diversity_losses.append(diversity_loss)
+        
+        return torch.mean(torch.stack(diversity_losses)) if diversity_losses else torch.tensor(0.0, device=outputs['shape'].device)

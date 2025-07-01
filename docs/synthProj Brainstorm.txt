@@ -1,0 +1,75 @@
+Project Brainstorm
+
+###Important Thoughts 
+
+Sliding between shape domain and time domain should be invariant as much as possible. Can look from time or step pinto spaces between stems. 
+
+Going to build a consistent notation to better keep track of bytes, stems, time, any other dimension. May end up being similar to tensor notation.
+Will require a concrete hierarchy of components (BST?) eg. Byte < Stem < Song
+
+Do I create a set of waves for stems in a song which are then cut into shapes as they interact? Or is the representation a series of the shapes which behave as a wave?
+
+Are these shapes closed form?
+
+How to build/describe the time coordinate plane?
+Maybe 3 frames to consider: memory snapshot, current snapshot, prediction snapshot
+Is POV_o set at t=0 with an even spread of t on either side? 
+Does origin exist from t=0 to t' (looking forward in time), t=0 as midpoint of t= +- t', etc
+I think I want to describe the case where I am unbiased and can shift between prediction and memory without shifting-looking head on so to speak, not leaning one way and looking the other. 
+
+Sounds that exist only in an instant are perceived and can be recalled as their respective SHAPE but do not exist in a plane with multiple frames of reference. 
+
+The instance of beats can be used to capture frames. 
+
+May want to standardize to listening device ie my Sony headphones w normal settings. 
+
+Notation
+
+
+Time domain: looking at wave form of sounds in units of t. View of frame which may or may not be symmetric about t = 0. May be used to consider the waves observed in frames as discreet evolutions. 
+
+Space domain: looking at wave forms along geometry of stems not considering time. These shapes are assembled linearly in time but need not be at t == 0. This frame follows actual trajectories of shape wave form. Possible that the wave forms are continuous in this domain, long as invariant into and from time domain. 
+
+Stem: the component wave of individual shapes which I visualize. Bass stem, vocal stem, guitars, hi-hats, etc. (maybe have stem notation with unique subscript as it pertains) [see Sub Wave]
+ 
+Beats: Beats help in building the geometries of a stem and may actually be what defines the time domain. 
+
+
+Bytes: describes points along the stems. Unspecified as to peak trough etc, but will probably have a time notation and stem notation (t, ). Unit in the space domain. May be analogous to a beat, possibly unit of conversion between time and space domains. 
+
+POV/snapshot: The POV is the snapshot I am considering. As of now could be the memory POV, present POV, prediction POV [may swap frame and snapshot to describe the cross section]
+
+
+Frame: the frame is the cross section of the wave form I consider in any POV. A mental picture, so to speak. 
+
+
+Sub Wave: Adding this to better describe the individual wave form. Sub waves in a frame in time domaine are the individual wave forms and shapes. Sounds need not be continuous, boop and beep exist as individual shapes. Stem, time notation
+ 
+Wave: In time domain, the set of sub waves between t_1, t_2 when viewed are the wave.
+	In space domain, a wave may be used interchangeably with sub-wave in many cases  
+
+Abstract
+
+In this document I will be planning out this project. There will be many components but the ultimate goal is to create some program which maps sounds- specifically music- into visuals. These visuals will be generally referred to as shapes, objects, or maybe even something else, however these are to be considered the same in any case unless stated otherwise. 
+
+I create a visual representation of sounds when I hear them. More than not, they appear to be some 2D or 3D shape/structure/space with consistency. Let's consider music, for example. When I listen to music, I visualize the song as a set of shapes which evolves over time.  Essentially, I visualize a wave form of shapes which is apparent in real time as a song is played. I can describe this wave form in a time domain but also in what I would consider to be a physical analysis of the song in space. 
+
+
+Time domain:
+
+- as music plays, there is a frame which appears in real time as the song plays. Consider this as a frame on a computer. Observing in this frame, one is aware of a set of waves which exist from some [t_1, t_2]. This frame may be defined by the timing of beats in the song, and the set of sub-waves being the objects captured. {interesting to consider for organizational, as this frame being a discreet object which evolves to a new frame} 
+
+- Observing wave at some t where t_1 <= t <= t_2
+
+- Frame in time domain captures wave form as a continuous object between two beats, b_1 and b_2 where b_1 and b_2 are beats at t = t_1 and t_2, respectively. 
+
+
+
+
+
+Ultimately, I can see this at some point in the future being an interactive art medium where drawings/visual art can be encoded musically. 
+
+I think I'll end up having to create a set of rules (how definitive, tbd) to convert sounds into objects with a volume quality to them. Some combination of pitch, tempo, depth , texture, :length of beat?" 
+What are some characteristics/components of sound that can best be used to describe the shapes?
+Considering percussion / base structure would be ideal for the definition of this. 
+Then thinner sounds could end up lacking all but some combination of the dimensionality that is present in bass sound
