@@ -161,6 +161,27 @@ class UnityDataGenerator:
         
         return texture
     
+    def _calculate_color_from_spectrum(self, magnitudes: np.ndarray, frequencies: np.ndarray) -> List[float]:
+        """Calculate color parameters from spectral characteristics."""
+        # Color based on frequency distribution (similar to how we perceive sound)
+        low_freq_ratio = np.sum(magnitudes[frequencies < 500]) / (np.sum(magnitudes) + 1e-8)
+        mid_freq_ratio = np.sum(magnitudes[(frequencies >= 500) & (frequencies < 2000)]) / (np.sum(magnitudes) + 1e-8)
+        high_freq_ratio = np.sum(magnitudes[frequencies >= 2000]) / (np.sum(magnitudes) + 1e-8)
+        
+        # Map to RGBA
+        color = [
+            low_freq_ratio,    # Red (low frequencies)
+            mid_freq_ratio,    # Green (mid frequencies)
+            high_freq_ratio,   # Blue (high frequencies)
+            0.8                # Alpha (opacity)
+        ]
+        
+        # Normalize
+        color = [np.clip(c, 0.0, 1.0) for c in color]
+        
+        return color
+    
+    def _calculate_brightness_from_spectrum(self, magnitudes: np.ndarray) -> float:
         """Calculate brightness from spectral energy."""
         brightness = np.mean(magnitudes)
         return float(np.clip(brightness, 0.0, 1.0))

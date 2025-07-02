@@ -28,6 +28,26 @@ from neural_network import VisualEncoder, UnsupervisedVisualEncoder
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def custom_collate_fn(batch):
+    """
+    Custom collate function to handle variable-length spectral data.
+    Pads sequences to the maximum length in the batch.
+    """
+    # Find the maximum sequence length in this batch
+    max_length = max(tensor.shape[0] for tensor in batch)
+    batch_size = len(batch)
+    feature_dim = batch[0].shape[1]
+    
+    # Create padded tensor
+    padded_batch = torch.zeros(batch_size, max_length, feature_dim, dtype=torch.float32)
+    
+    # Fill in the actual data
+    for i, tensor in enumerate(batch):
+        length = tensor.shape[0]
+        padded_batch[i, :length, :] = tensor
+    
+    return padded_batch
+
 def get_directory_size(directory_path: Path) -> Tuple[int, str]:
     """Get the total size of a directory in bytes and human-readable format."""
     total_size = 0
@@ -361,22 +381,40 @@ class VisualEncoderTrainer:
         
         with torch.no_grad():
             for batch_idx, spectral_data in enumerate(tqdm(dataloader, desc="Generating Unity data")):
-                spectral_data = spectral_data.to(self.device)
-                outputs = self.model(spectral_data)
-                
-                # Convert outputs to Unity-compatible format
+                # Process each sample individually to get one set of parameters per audio segment
                 for i in range(spectral_data.shape[0]):  # For each sample in batch
+                    # Get the first valid time step from the sequence
+                    sample_sequence = spectral_data[i]  # Shape: (sequence_length, features)
+                    
+                    # Find first non-zero row (actual data, not padding)
+                    non_zero_mask = torch.any(sample_sequence != 0, dim=1)
+                    if torch.any(non_zero_mask):
+                        first_valid_idx = torch.where(non_zero_mask)[0][0]
+                        # Extract just the first valid time step
+                        single_timestep = sample_sequence[first_valid_idx:first_valid_idx+1]  # Shape: (1, features)
+                        time_value = float(single_timestep[0, 0].cpu().numpy())
+                    else:
+                        # If no valid data, use the first row
+                        single_timestep = sample_sequence[0:1]  # Shape: (1, features)
+                        time_value = 0.0
+                    
+                    # Process this single timestep through the model
+                    single_timestep = single_timestep.to(self.device)
+                    outputs = self.model(single_timestep)
+                    
+                    # Extract visual parameters for this sample
+                    # Each output is a tensor of shape (1, feature_dim)
                     sample_data = {
                         'segment_id': f"batch_{batch_idx}_sample_{i}",
-                        'time': float(spectral_data[i, 0].cpu().numpy()),  # First element is time
+                        'time': time_value,
                         'visual_params': {
-                            'shape': outputs['shape'][i].cpu().numpy().tolist(),
-                            'motion': outputs['motion'][i].cpu().numpy().tolist(),
-                            'texture': outputs['texture'][i].cpu().numpy().tolist(),
-                            'color': outputs['color'][i].cpu().numpy().tolist(),
-                            'brightness': float(outputs['brightness'][i].cpu().numpy()),
-                            'position': outputs['position'][i].cpu().numpy().tolist(),
-                            'pattern': outputs['pattern'][i].cpu().numpy().tolist()
+                            'shape': outputs['shape'][0].cpu().numpy().tolist(),
+                            'motion': outputs['motion'][0].cpu().numpy().tolist(),
+                            'texture': outputs['texture'][0].cpu().numpy().tolist(),
+                            'color': outputs['color'][0].cpu().numpy().tolist(),
+                            'brightness': float(outputs['brightness'][0].cpu().numpy()),  # This is a single value
+                            'position': outputs['position'][0].cpu().numpy().tolist(),
+                            'pattern': outputs['pattern'][0].cpu().numpy().tolist()
                         }
                     }
                     unity_data.append(sample_data)
@@ -440,7 +478,8 @@ def main():
         batch_size=settings.processing.batch_size,
         shuffle=True,
         num_workers=settings.processing.num_workers,
-        drop_last=True
+        drop_last=True,
+        collate_fn=custom_collate_fn
     )
     
     val_dataloader = DataLoader(
@@ -448,7 +487,8 @@ def main():
         batch_size=settings.processing.batch_size,
         shuffle=False,
         num_workers=settings.processing.num_workers,
-        drop_last=True
+        drop_last=True,
+        collate_fn=custom_collate_fn
     )
     
     # Create model with correct input dimension

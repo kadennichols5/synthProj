@@ -156,6 +156,11 @@ separated/
 separated_output/
 batch_separated_output/
 
+# Symbolic links to external drive data (local development only)
+segmented_audio
+segmented_stems 2
+spectral_data
+
 # Processing logs and temporary files
 *.log
 separation.log
