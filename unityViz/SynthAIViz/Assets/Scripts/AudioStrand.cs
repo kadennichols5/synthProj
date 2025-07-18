@@ -59,23 +59,23 @@ public class AudioStrand : MonoBehaviour
             SetupLineRenderer();
         }
         // create particle system for texture effects
-        if (particles = null)
+        if (particles == null)
         {
             GameObject particlesObj = new GameObject("StrandParticles"); //initialize new object
-            particleObj.transform.SetParent(transform); // makes particlesObj child of audio strand
-            particles = particleObj.AddComponent<ParticleSystem>(); 
+            particlesObj.transform.SetParent(transform); // makes particlesObj child of audio strand
+            particles = particlesObj.AddComponent<ParticleSystem>(); 
             //.adds component data type= ParticleSystem to 
             // game object called particleObj now known as particles
             SetUpParticleSystem();
         }
 
-        if (trailRenderer = null)
+        if (trailRenderer == null)
         {
             trailRenderer = gameObject.AddComponent<TrailRenderer>();
             SetupTrailRenderer();
         }
 
-        CreateBaseMesh()
+        CreateBaseMesh();
     }
 
     void SetUpLineRenderer()
@@ -133,7 +133,7 @@ public class AudioStrand : MonoBehaviour
         // generate vertices 
         for (int ring = 0; ring <= rings; ring++)
         {
-            float v = float(ring/rings);
+            float v = (float)(ring/rings);
             float phi = v * Mathf.PI;
             
             for (int segment = 0; segment <= segments; segment++)
@@ -153,9 +153,9 @@ public class AudioStrand : MonoBehaviour
         }
 
         //generate triangles (2 per square)
-        for (int ring; ring < rings; ring++);
+        for (int ring = 0; ring < rings; ring++)
         {
-            for (int segment = 0; segment < segments; segment++);
+            for (int segment = 0; segment < segments; segment++)
             {
                 int current = rings * (segments + 1) + segments;
                 int next = current + segments + 1;
@@ -261,7 +261,7 @@ public class AudioStrand : MonoBehaviour
         pointParameters.Add(parameters);
 
         // limit strand length, remove info at index 0
-        while (strandPoints.count < maxStrandPoints)
+        while (strandPoints.Count < maxStrandPoints)
         {
             strandPoints.RemoveAt(0); 
             pointTimes.RemoveAt(0);
@@ -272,7 +272,7 @@ public class AudioStrand : MonoBehaviour
 
     void UpdateShape(VisualParameters parameters)
     {
-        if (parameters.shape = null || parameters.shape.Length < 6) return;
+        if (parameters.shape == null || parameters.shape.Length < 6) return;
 
         float roundness = parameters.shape[0];
         float complexity = parameters.shape[1];
@@ -283,11 +283,11 @@ public class AudioStrand : MonoBehaviour
 
         // deform mesh based on visual parameters
 
-        Vector3[] vertices = new Vector3[baseVertices.length];
+        Vector3[] vertices = new Vector3[baseVertices.Length];
 
-        for (int i=0;int < baseVertices.Length; i++)
+        for (int i=0;i < baseVertices.Length; i++)
         {
-            Vector3 vertex = baseVertices[i]; // working copy of og sphere point
+            Vector3 vertex = baseVertices[i]; // working copy of original sphere point
 
             //apply roundness
             float sphericalFactor = Mathf.Lerp(0.5f, 1.0f, roundness);
@@ -316,12 +316,12 @@ public class AudioStrand : MonoBehaviour
 
     void UpdateMotion(VisualParameters parameters)
     {
-        if (parameters.motion = null || parameters.motion.Length < 6) return;
+        if (parameters.motion == null || parameters.motion.Length < 6) return;
 
         Vector3 velocity = new Vector3(parameters.motion[0], parameters.motion[2], parameters.motion[4]);
         Vector3 acceleration = new Vector3(parameters.motion[1], parameters.motion[3], parameters.motion[5]);
 
-        //apply motino to current velocity and time position
+        //apply motion to current velocity and time position
         currentVelocity += acceleration * Time.deltaTime; 
         currentVelocity = Vector3.Lerp(currentVelocity, velocity, Time.deltaTime * 2f);
 
@@ -364,7 +364,7 @@ public class AudioStrand : MonoBehaviour
 
     void UpdateColor(VisualParameters parameters)
     {
-        if parameters.color = null || parameters.color.Length < 4) return;
+        if (parameters.color == null || parameters.color.Length < 4) return;
         
         Color newColor = new Color(parameters.color[0], parameters.color[1], parameters.color[2], parameters.color[3]);
 
@@ -397,3 +397,103 @@ public class AudioStrand : MonoBehaviour
         }
 
     }
+    void UpdatePosition(VisualParameters parameters)
+    {
+        if (parameters.position == null || parameters.position.Length < 3) return;
+
+        Vector3 targetPosition = new Vector3(parameters.position[0], parameters.position[1], parameters.position[2]);
+
+        // scale to space bounds 
+        targetPosition = Vector3.Scale(targetPosition, new Vector3(5f, 5f, 5f));
+
+        // smoothly move towards target position
+        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * 2f);
+    }
+    
+    void UpdatePattern(VisualParameters parameters)
+    {
+        if (parameters.pattern == null || parameters.pattern.Length < 6) return;
+
+        float frequency = parameters.pattern[0];
+        float intensity = parameters.pattern[2];
+
+
+        // pattern based pulse effect
+        float pulse = Mathf.Sin(Time.time * frequency *10f) * intensity;
+        Vector3 pulsedScale = transform.localScale * (1f + pulse * 0.2f);
+        transform.localScale = pulsedScale;
+
+        // particel emission updated based on pattern
+        if (particles != null)
+        {
+            var emission = particles.emission;
+            emission.rateOverTime = Mathf.Lerp(5, 50, intensity);
+
+        }
+
+    }  
+
+    void UpdateStrandVisualization()
+    {
+        if (strandPoints.Count < 2 ) return; // needs 2 points to draw a line
+
+        //update line renderer with strand points
+        lineRenderer.positionCount = strandPoints.Count;
+        lineRenderer.SetPositions(strandPoints.ToArray());
+
+        //update line width based on parameters
+        if (pointParameters.Count > 0)
+        {
+            var lastParams = pointParameters[pointParameters.Count -1];
+            if (lastParams.texture == null || lastParams.texture.Length < 2)
+            {
+                float thickness = Mathf.Lerp(0.05f, 0.3f, lastParams.texture[2]);
+                lineRenderer.startWidth = thickness;
+                lineRenderer.endWidth = thickness * 0.3f;
+
+            }
+        }
+    }
+    
+    public void ResetStrand()
+    {
+        strandPoints.Clear();
+        pointTimes.Clear();
+        pointParameters.Clear();
+        currentVelocity = Vector3.zero;
+
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+        transform.localScale = Vector3.one;
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.positionCount = 0;
+
+        }
+
+        if (particles != null)
+        {
+            particles.Clear();
+        }
+
+    }
+    void OnDrawGizmos()
+    {
+        // Draw strand path
+        if (strandPoints != null && strandPoints.Count > 1)
+        {
+            Gizmos.color = BaseColor;
+            for (int i = 0; i < strandPoints.Count - 1; i++)
+            {
+                Gizmos.DrawLine(strandPoints[i], strandPoints[i + 1]);
+            }
+        }
+        
+        // Draw current position
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(transform.position, 0.1f);
+    }
+
+
+}

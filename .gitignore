@@ -260,3 +260,6 @@ docs/doctrees/
 models/
 checkpoints/
 weights/
+
+
+.cursor/rules 
