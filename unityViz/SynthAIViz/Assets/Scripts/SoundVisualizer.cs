@@ -4,19 +4,18 @@ using System.IO;
 using System.Linq;
 
 [System.Serializable]
-
 public class VisualParameters
 {
     public float[] shape = new float[6]; // roundness, complexity, sharpness, symmetry, regularity, detail
     public float[] motion = new float[6]; // [V_x, A_x, V_y, A_y, V_z, A_z]
     public float[] texture = new float[8]; // [rough, smooth, densitu, variation, scale, detail, contrast, pattern]
-    public float[] color  new float[4]; // [R,G,B,A]
+    public float[] color = new float[4]; // [R,G,B,A]
     public float brightness = 1.0f;
     public float[] position = new float[3]; // [x,y,z]
     public float[] pattern = new float[6]; // [freq, regularity, intensity, symmetry, complexity, variation]
 
     // constructor - default values 
-    public VisualParameters();
+    public VisualParameters()
     {
         shape = new float[] { 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
         motion = new float[] { 0f, 0f, 0f, 0f, 0f, 0f };
@@ -25,21 +24,15 @@ public class VisualParameters
         brightness = 1.0f;
         position = new float[] { 0f, 0f, 0f };
         pattern = new float[] { 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
-
     }
-    
-    
-
-
-
 }
+
 [System.Serializable]
-pubic class VisualFrame
+public class VisualFrame
 { 
     public float time;
     public string stem;
     public VisualParameters visual_parameters;
-
 }
 
 [System.Serializable]
@@ -158,7 +151,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
             ValidateExistingPrefab();
 
         }
-        Debug.Log("Initialized with AudioStrand Architecture")
+        Debug.Log("Initialized with AudioStrand Architecture");
 
 
     }
@@ -206,7 +199,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
         AudioStrand strand = strandPrefab.AddComponent<AudioStrand>();
         if (strand == null)
         {
-            Debug.LogError("Strand prefab missing AudioStrand component. Assign prefab.")
+            Debug.LogError("Strand prefab missing AudioStrand component. Assign prefab.");
             return;
         }
 
@@ -250,7 +243,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
             Debug.LogError($"Visual data file not found:{filePath}");
             //search alternate locations
 
-            filePath = PathxCombine(ApplicationxdataPath, "StreamingAssets", dataFilePath);
+            filePath = Path.Combine(Application.dataPath, "StreamingAssets", dataFilePath);
             if (!File.Exists(filePath))
             {
                 Debug.LogError($"Visual data file not found in alternative location: {filePath}");
@@ -261,7 +254,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
 
         try
         {
-            string jsonData = FilexReadAllText(filePath);
+            string jsonData = File.ReadAllText(filePath);
             // handle other JSON formats from python data generator
 
             if (jsonData.TrimStart().StartsWith("["))
@@ -284,14 +277,14 @@ public class SynesthesiaVisualizer : MonoBehaviour
             PrepareVisualization();
 
         }
-        catch (System.exception e)
+        catch (System.Exception e)
         {
-            Debug.LogError($"Error loading visual data:{e.message}");
+            Debug.LogError($"Error loading visual data:{e.Message}");
             CreateFallbackVisualization();
         }
     }
 
-    void ValidateLoadedData();
+    void ValidateLoadedData()
     {
         int totalFrames = 0;
 
@@ -304,10 +297,10 @@ public class SynesthesiaVisualizer : MonoBehaviour
                 //validate visual parameters match given python generator's output
                 foreach (var frame in segment.frames)
                 {
-                    if (frame.visual_params == null)
+                    if (frame.visual_parameters == null)
                     {
-                        frame.visual_params = new VisualParameters();
-                        Debug.LogWarning($"Missing visual parameters for frame at time {frame.time}, using defaiult instead");
+                        frame.visual_parameters = new VisualParameters();
+                        Debug.LogWarning($"Missing visual parameters for frame at time {frame.time}, using default instead");
                         
                         
                     }
@@ -315,7 +308,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
             }
 
         }
-        Debug.log($"Validated data: {totalFrames} total frames from NN output.");
+        Debug.Log($"Validated data: {totalFrames} total frames from NN output.");
 
         
     }
@@ -334,7 +327,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
 
     };
     string[] stems = { "bass", "drums", "vocals", "other" };
-    for (int = 0; int < 100; i++)
+    for (int i = 0; i < 100; i++)
     {
         foreach (string stem in stems)
         {
@@ -342,16 +335,16 @@ public class SynesthesiaVisualizer : MonoBehaviour
             {
                 time = i * 0.1f,
                 stem = stem,
-                visual_params = new VisualParameters()
+                visual_parameters = new VisualParameters()
 
             };
             // simulate output patterns from NN
             float t = i * 0.1f;
-            frame.visual_params.shape[0] = 0.3f + 0.4f * MathfSin(t * 0.5f); //roundness
-            frame.visual_params.shape[1] = 0.2f + 0.3f * Mathf.Sin(t * 0.8f); // complexity
-            frame.visual_params.position[0] = Mathf.Sin(t) * 2f;
-            frame.visual_params.position[1] = Mathf.Cos(t) * 2f;
-            frame.visual_params.brightness = 0.5f + 0.5f * Mathf.Sin(t * 0.3f);
+            frame.visual_parameters.shape[0] = 0.3f + 0.4f * Mathf.Sin(t * 0.5f); //roundness
+            frame.visual_parameters.shape[1] = 0.2f + 0.3f * Mathf.Sin(t * 0.8f); // complexity
+            frame.visual_parameters.position[0] = Mathf.Sin(t) * 2f;
+            frame.visual_parameters.position[1] = Mathf.Cos(t) * 2f;
+            frame.visual_parameters.brightness = 0.5f + 0.5f * Mathf.Sin(t * 0.3f);
 
             fallbackData.frames.Add(frame);
 
@@ -399,7 +392,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
             strand.Initialize(stemType, stemColor);
             activeStrands[stemType] = strand;
 
-            Debug.Log($"Created {stemType} strand w/ app architecture")
+            Debug.Log($"Created {stemType} strand w/ app architecture");
 
         }
         // organize frames by stem
@@ -437,7 +430,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
         frameCount++;
 
         // update each audio strand using UpdateVisualization()
-        foreach ( var stemType in stemFrameBuffers.key)
+        foreach ( var stemType in stemFrameBuffers.Keys)
         {
             if (!activeStrands.ContainsKey(stemType)) continue;
 
@@ -458,7 +451,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError($"Error updating {stemType} strand: {e.message}");
+                    Debug.LogError($"Error updating {stemType} strand: {e.Message}");
                 }
             }
         }
@@ -486,16 +479,35 @@ public class SynesthesiaVisualizer : MonoBehaviour
 
     }
 
-    Color GetStemColor(string stemType);
+    VisualFrame GetFrameAtTime(List<VisualFrame> frames, float targetTime)
+    {
+        if (frames.Count == 0) return null;
+
+        // frame lookup for larger data set
+        VisualFrame closestFrame = frames[0];
+        float closestDistance = Mathf.Abs(closestFrame.time - targetTime);
+
+        foreach (var frame in frames)
+        {
+            float distance = Mathf.Abs(frame.time - targetTime);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestFrame = frame;
+            }
+        }
+        return closestFrame;
+    }
+
+    Color GetStemColor(string stemType)
     {
         switch (stemType.ToLower())
         {
             case "bass": return bassColor;
-            case "drums": return drumsColor;
-            case "vocals": return vocalsColor;
+            case "drums": return drumColor;
+            case "vocals": return vocalColor;
             case "other": return otherColor;
             default: return Color.white;
-
         }
     }
 
@@ -503,22 +515,21 @@ public class SynesthesiaVisualizer : MonoBehaviour
     {
         // live photo implementation
         GameObject frameObj = new GameObject($"Frame_{Time.time:F2}");
-        frameObj.transform.setParent(spaceContainer);
+        frameObj.transform.SetParent(spaceContainer);
 
         // capture state of all active strands 
-        foreach (kvp in activeStrands)
+        foreach (var kvp in activeStrands)
         {
-            if (kvp.Value == null) continue:
+            if (kvp.Value == null) continue;
 
-            GameObject strandSnapshot = new GameObject($"Strand_{kvp.key}");
+            GameObject strandSnapshot = new GameObject($"Strand_{kvp.Key}");
             strandSnapshot.transform.SetParent(frameObj.transform);
             strandSnapshot.transform.position = kvp.Value.transform.position;
             strandSnapshot.transform.rotation = kvp.Value.transform.rotation;
             strandSnapshot.transform.localScale = kvp.Value.transform.localScale;
 
-            // copy strand component propertiees
+            // copy strand component properties
             CopyStrandProperties(kvp.Value.gameObject, strandSnapshot);
-
         }
 
         currentFrameObjects.Add(frameObj);
@@ -529,7 +540,6 @@ public class SynesthesiaVisualizer : MonoBehaviour
             GameObject oldFrame = currentFrameObjects[0];
             currentFrameObjects.RemoveAt(0);
             if (oldFrame != null) Destroy(oldFrame);
-            
         }
     }
 
@@ -539,7 +549,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
         StrandRenderer sourceRenderer = source.GetComponent<StrandRenderer>();
         if (sourceRenderer?.meshRenderer != null)
         {
-            sourceRenderer targetRenderer = target.AddComponent<MeshRenderer>();
+            MeshRenderer targetRenderer = target.AddComponent<MeshRenderer>();
             targetRenderer.material = new Material(sourceRenderer.meshRenderer.material);
 
             StrandMeshGenerator sourceMesh = source.GetComponent<StrandMeshGenerator>();
@@ -552,7 +562,6 @@ public class SynesthesiaVisualizer : MonoBehaviour
                 {
                     targetMesh.mesh = sourceMeshFilter.mesh;
                 }
-
             }
         }
     }
@@ -566,7 +575,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
             {
                 Debug.LogWarning($"Performance warning: {fps:F1}FPS - consider reducing mesh quality");
             }
-            frame.count = 0;
+            frameCount = 0;
             lastUpdateTime = Time.time;
 
         }
@@ -624,7 +633,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
         currentDataIndex = 0;
 
         // reset all strands with ResetStrand() method
-        foreach (var strand in activeStrand.Values)
+        foreach (var strand in activeStrands.Values)
         {
             if (strand != null)
             {
@@ -647,11 +656,11 @@ public class SynesthesiaVisualizer : MonoBehaviour
     
     void OnGUI()
     {
-        GUILayout.BeginArea(new React(10, 10, 400, 280));
+        GUILayout.BeginArea(new Rect(10, 10, 400, 280));
 
         GUILayout.Label($"Synth Vis - {(isPlaying ? "Playing" : "Paused")}");
         GUILayout.Label($"Modular AudioStrand Architecture");
-        GUILayout.Label($"Time: {elapsedTime.F2}s (Scale: {timeScale:F2}).");
+        GUILayout.Label($"Time: {elapsedTime:F2}s (Scale: {timeScale:F2}).");
         GUILayout.Label($"Active Strands: {activeStrands.Count}");
         GUILayout.Label($"Time Domain Capture: {enableFrameCapture}");
 
@@ -671,7 +680,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
 
         GUILayout.Space(10);
         GUILayout.Label("Controls:");
-        GUILayout.Labeel("Space - Play/Pause");
+        GUILayout.Label("Space - Play/Pause");
         GUILayout.Label("R - Reset");
         GUILayout.Label("F - Toggle Time Domain Capture");
         GUILayout.Label("L - Reload Data");
