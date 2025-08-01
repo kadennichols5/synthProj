@@ -36,12 +36,25 @@ public class VisualFrame
 }
 
 [System.Serializable]
+public class SimpleVisualFrame
+{
+    public string segment_id;
+    public float time;
+    public VisualParameters visual_params;
+}
+
+[System.Serializable]
+public class SimpleVisualFrameWrapper
+{
+    public SimpleVisualFrame[] Items;
+}
+
+[System.Serializable]
 public class UnityVisualData
 {
     public string segment_name;
     public string timestamp;
-    public List<VisualParameters> frames;
-
+    public List<VisualFrame> frames;
 }
 
 [System.Serializable]
@@ -93,7 +106,6 @@ public class SynesthesiaVisualizer : MonoBehaviour
     private Dictionary<string, AudioStrand> activeStrands;
     private Dictionary<string, List<VisualFrame>> stemFrameBuffers;
     private float elapsedTime = 0f;
-    private int currentDataIndex = 0;
     private bool isPlaying = false;
 
     // frame capture for time domain
@@ -114,15 +126,12 @@ public class SynesthesiaVisualizer : MonoBehaviour
 
     void Update()
     {
-        if (isPlaying && visualDataList != null && visualDataList.Count < 0)
+        if (isPlaying && visualDataList != null && visualDataList.Count > 0)
         {
             UpdateVisualization();
-
         }
         HandleInput();
         UpdatePerformanceMetrics();
-
-
     }
 
     void InitializaVisualization()
@@ -174,7 +183,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
         // physics component
         StrandPhysics physics = strandPrefab.AddComponent<StrandPhysics>();
         physics.velocityDamping = 2f;
-        physics.position.Lerp = 2f;
+        physics.positionLerp = 2f;
         physics.rotationMultiplier = 50f;
 
         // main AudioStrand coordinator
@@ -255,27 +264,58 @@ public class SynesthesiaVisualizer : MonoBehaviour
         try
         {
             string jsonData = File.ReadAllText(filePath);
-            // handle other JSON formats from python data generator
-
+            
+            // Check if it's the simple format (array of frames)
             if (jsonData.TrimStart().StartsWith("["))
             {
-                //direct array format
-                VisualizationDataWrapper wrapper = JsonUtility.FromJson<VisualizationDataWrapper>("{\"data\":" + jsonData + "}");
-                visualDataList = wrapper.data;
-
+                // Parse as array of SimpleVisualFrame using wrapper
+                SimpleVisualFrameWrapper wrapper = JsonUtility.FromJson<SimpleVisualFrameWrapper>("{\"Items\":" + jsonData + "}");
+                SimpleVisualFrame[] simpleFrames = wrapper.Items;
+                
+                // Convert to expected format
+                visualDataList = new List<UnityVisualData>();
+                UnityVisualData convertedData = new UnityVisualData
+                {
+                    segment_name = "converted_data",
+                    timestamp = System.DateTime.Now.ToString(),
+                    frames = new List<VisualFrame>()
+                };
+                
+                // Convert each simple frame to VisualFrame with stem assignment
+                string[] stems = { "bass", "drums", "vocals", "other" };
+                for (int i = 0; i < simpleFrames.Length; i++)
+                {
+                    VisualFrame frame = new VisualFrame
+                    {
+                        time = simpleFrames[i].time,
+                        stem = stems[i % stems.Length], // Cycle through stems
+                        visual_parameters = simpleFrames[i].visual_params
+                    };
+                    convertedData.frames.Add(frame);
+                }
+                
+                visualDataList.Add(convertedData);
             }
             else
             {
-                //single object format 
-                UnityVisualData singleData = JsonUtility.FromJson<UnityVisualData>(jsonData);
-                visualDataList = new List<UnityVisualData>(singleData);
-
-
+                // Handle original format
+                if (jsonData.TrimStart().StartsWith("["))
+                {
+                    //direct array format
+                    VisualizationDataWrapper wrapper = JsonUtility.FromJson<VisualizationDataWrapper>("{\"data\":" + jsonData + "}");
+                    visualDataList = wrapper.data;
+                }
+                else
+                {
+                    //single object format 
+                    UnityVisualData singleData = JsonUtility.FromJson<UnityVisualData>(jsonData);
+                    visualDataList = new List<UnityVisualData> { singleData };
+                }
             }
+            
             Debug.Log($"Loaded {visualDataList.Count} segments from Unity Data Generator");
             ValidateLoadedData();
             PrepareVisualization();
-
         }
         catch (System.Exception e)
         {
@@ -321,7 +361,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
     // create test data for test of spectral -> space domain
     UnityVisualData fallbackData = new UnityVisualData
     {
-        segment_name = 'architecture_test',
+        segment_name = "architecture_test",
         timestamp = System.DateTime.Now.ToString(),
         frames = new List<VisualFrame>(),
 
@@ -367,8 +407,8 @@ public class SynesthesiaVisualizer : MonoBehaviour
         activeStrands.Clear();
         stemFrameBuffers.Clear();
 
-        // init srrand buffers for stem types
-        string[] stemTypes = {"bass", "drums", "vocal", "other"};
+        // init strand buffers for stem types
+        string[] stemTypes = {"bass", "drums", "vocals", "other"};
 
         foreach (string stemType in stemTypes)
         {
@@ -413,14 +453,14 @@ public class SynesthesiaVisualizer : MonoBehaviour
         // frame sorting by time
         foreach (var buffer in stemFrameBuffers.Values)
         {
-            buffer.Sort((a , b)) => a.Time.CompareTo(b.time));
+            buffer.Sort((a , b) => a.time.CompareTo(b.time));
 
         }
         Debug.Log("visualization prepared w audio strand architecture");
 
         foreach( var kvp in stemFrameBuffers)
         {
-            Debug.Log($"{kvp.Key}: {kvp.Value.Count} frames")''
+            Debug.Log($"{kvp.Key}: {kvp.Value.Count} frames");
         }
     }
 
@@ -456,27 +496,12 @@ public class SynesthesiaVisualizer : MonoBehaviour
             }
         }
 
-        // handle frame capture 
-        if (frames.Count == 0) return null;
-
-        // frame lookup for larger data set
-        VisualFrame closestFrame = frames[0];
-        float closestDistance = Mathf.Abs(closestFrame.time - targetTime);
-
-        foreach (var frame in frames)
+        // handle frame capture for time domain
+        if (enableFrameCapture && Time.time - lastFrameTime >= frameDuration)
         {
-            float distance = Mathf.Abs(frame.time - targetTime);
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-                closestFrame = frame;
-
-            }
-
+            CaptureCurrentFrame();
+            lastFrameTime = Time.time;
         }
-        return closestFrame;
-
-
     }
 
     VisualFrame GetFrameAtTime(List<VisualFrame> frames, float targetTime)
@@ -630,7 +655,6 @@ public class SynesthesiaVisualizer : MonoBehaviour
     public void ResetVisualization()
     {
         elapsedTime = 0f;
-        currentDataIndex = 0;
 
         // reset all strands with ResetStrand() method
         foreach (var strand in activeStrands.Values)
@@ -638,7 +662,6 @@ public class SynesthesiaVisualizer : MonoBehaviour
             if (strand != null)
             {
                 strand.ResetStrand();
-
             }
         }
 
