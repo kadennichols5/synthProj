@@ -63,10 +63,10 @@ public class VisualizationDataWrapper
     public List<UnityVisualData> data;
 }
 
-public class SynesthesiaVisualizer : MonoBehaviour
+public class SoundVisualizer : MonoBehaviour
 {
     [Header("Data Configuration")]
-    public string dataFilePath = "placeholder_visual.json"; //unity_visual_data.json?
+    public string dataFilePath = "unity_visual_data.json"; // Updated to match actual file
     public bool loadOnStart = true;
     public bool enableRealTimeMode = false;
 
@@ -98,7 +98,8 @@ public class SynesthesiaVisualizer : MonoBehaviour
     public Material defaultStrandMaterial;
     public int meshQuality = 16;
 
-    //[Header("")]
+    [Header("Debug Settings")]
+    public bool testMode = false; // Set to true to test with simple objects
 
     //internal data 
 
@@ -118,9 +119,24 @@ public class SynesthesiaVisualizer : MonoBehaviour
 
     void Start()
     {
-        if (loadOnStart)
+        Debug.Log("=== Synth Viz Start() called ===");
+        try
         {
-            LoadVisualData();
+            Debug.Log("Starting InitializeVisualization...");
+            InitializeVisualization();
+            Debug.Log("InitializeVisualization completed successfully");
+            
+            if (loadOnStart)
+            {
+                Debug.Log("Starting LoadVisualData...");
+                LoadVisualData();
+                Debug.Log("LoadVisualData completed successfully");
+            }
+            Debug.Log("=== Synth Viz Start() completed successfully ===");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error in Start(): {e.Message}\n{e.StackTrace}");
         }
     }
 
@@ -134,7 +150,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
         UpdatePerformanceMetrics();
     }
 
-    void InitializaVisualization()
+    void InitializeVisualization()
     {
         activeStrands = new Dictionary<string, AudioStrand>();
         stemFrameBuffers = new Dictionary<string, List<VisualFrame>>();
@@ -169,38 +185,63 @@ public class SynesthesiaVisualizer : MonoBehaviour
     {
         Debug.Log("Creating strand prefab modularly");
 
-        strandPrefab = new GameObject("AudioStrandPrefab");
-
-        // add StrandMeshGenerator component
-        StrandMeshGenerator meshGen = strandPrefab.AddComponent<StrandMeshGenerator>();
-        meshGen.sphereSegments = meshQuality;
-        meshGen.sphereRings = meshQuality / 2;
-        meshGen.baseRadius = 0.5f;
-
-        // add strandRenderer component
-        StrandRenderer renderer = strandPrefab.AddComponent<StrandRenderer>();
-
-        // physics component
-        StrandPhysics physics = strandPrefab.AddComponent<StrandPhysics>();
-        physics.velocityDamping = 2f;
-        physics.positionLerp = 2f;
-        physics.rotationMultiplier = 50f;
-
-        // main AudioStrand coordinator
-        AudioStrand strand = strandPrefab.AddComponent<AudioStrand>();
-        strand.maxStrandLength = 50f;
-        strand.maxStrandPoints = 100;
-
-        //setup default material
-        if (defaultStrandMaterial != null)
+        try
         {
-            MeshRenderer meshRenderer = strandPrefab.AddComponent<MeshRenderer>();
-            meshRenderer.material = defaultStrandMaterial;
+            if (testMode)
+            {
+                // Test mode: Create simple objects without complex components
+                strandPrefab = new GameObject("TestStrandPrefab");
+                Debug.Log("Created simple test prefab");
+                strandPrefab.SetActive(false);
+                return;
+            }
+
+            strandPrefab = new GameObject("AudioStrandPrefab");
+            Debug.Log("Created GameObject for prefab");
+
+            // add StrandMeshGenerator component
+            StrandMeshGenerator meshGen = strandPrefab.AddComponent<StrandMeshGenerator>();
+            meshGen.sphereSegments = meshQuality;
+            meshGen.sphereRings = meshQuality / 2;
+            meshGen.baseRadius = 0.5f;
+            Debug.Log("Added StrandMeshGenerator component");
+
+            // add strandRenderer component
+            StrandRenderer renderer = strandPrefab.AddComponent<StrandRenderer>();
+            Debug.Log("Added StrandRenderer component");
+
+            // physics component
+            StrandPhysics physics = strandPrefab.AddComponent<StrandPhysics>();
+            physics.velocityDamping = 2f;
+            physics.positionLerp = 2f;
+            physics.rotationMultiplier = 50f;
+            Debug.Log("Added StrandPhysics component");
+
+            // main AudioStrand coordinator
+            AudioStrand strand = strandPrefab.AddComponent<AudioStrand>();
+            strand.maxStrandLength = 50f;
+            strand.maxStrandPoints = 100;
+            Debug.Log("Added AudioStrand component");
+
+            //setup default material
+            if (defaultStrandMaterial != null)
+            {
+                MeshRenderer meshRenderer = strandPrefab.AddComponent<MeshRenderer>();
+                meshRenderer.material = defaultStrandMaterial;
+                Debug.Log("Added MeshRenderer with default material");
+            }
+            else
+            {
+                Debug.LogWarning("No default material assigned - strands may not be visible");
+            }
+            
+            strandPrefab.SetActive(false);
+            Debug.Log("Created prefab with modular AudioStrand architecture");
         }
-        strandPrefab.SetActive(false);
-        Debug.Log("Created prefab with modular AudioStrand architecture");
-
-
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error creating strand prefab: {e.Message}\n{e.StackTrace}");
+        }
     }
 
     void ValidateExistingPrefab()
@@ -245,8 +286,9 @@ public class SynesthesiaVisualizer : MonoBehaviour
 
     public void LoadVisualData()
     {
+        Debug.Log($"Looking for file at: {dataFilePath}");
         string filePath = Path.Combine(Application.streamingAssetsPath, dataFilePath);
-
+        Debug.Log($"Full path: {filePath}");
         if (!File.Exists(filePath))
         {
             Debug.LogError($"Visual data file not found:{filePath}");
@@ -287,7 +329,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
                 {
                     VisualFrame frame = new VisualFrame
                     {
-                        time = simpleFrames[i].time,
+                        time = i * 0.1f, // Assign sequential time since all frames have time 0.0
                         stem = stems[i % stems.Length], // Cycle through stems
                         visual_parameters = simpleFrames[i].visual_params
                     };
@@ -295,6 +337,8 @@ public class SynesthesiaVisualizer : MonoBehaviour
                 }
                 
                 visualDataList.Add(convertedData);
+                Debug.Log($"Converted {simpleFrames.Length} frames to {convertedData.frames.Count} VisualFrames");
+                Debug.Log($"Sample frame - Time: {convertedData.frames[0].time}, Stem: {convertedData.frames[0].stem}, Brightness: {convertedData.frames[0].visual_parameters.brightness}");
             }
             else
             {
@@ -315,7 +359,15 @@ public class SynesthesiaVisualizer : MonoBehaviour
             
             Debug.Log($"Loaded {visualDataList.Count} segments from Unity Data Generator");
             ValidateLoadedData();
-            PrepareVisualization();
+            
+            if (!testMode)
+            {
+                PrepareVisualization();
+            }
+            else
+            {
+                Debug.Log("Skipping visualization preparation in test mode");
+            }
         }
         catch (System.Exception e)
         {
@@ -427,6 +479,7 @@ public class SynesthesiaVisualizer : MonoBehaviour
                 continue;
             }
 
+            Debug.Log($"Initializing {stemType} strand...");
             // initialize using initialize method
             Color stemColor = GetStemColor(stemType);
             strand.Initialize(stemType, stemColor);
