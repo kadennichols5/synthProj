@@ -458,7 +458,7 @@ def main():
         return
     
     # Create dataset
-    dataset = SpectralDataset(spectral_data_path, max_files=100)  # Limit for testing
+    dataset = SpectralDataset(spectral_data_path)  # Removed max_files limit to process full dataset
     
     if len(dataset) == 0:
         logger.error("No spectral data files found!")
