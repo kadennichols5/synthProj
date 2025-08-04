@@ -1,6 +1,7 @@
 """
 Configuration file for data paths.
 This file centralizes all data directory paths to make them easily configurable.
+Supports both local and external storage with automatic detection.
 """
 
 import os
@@ -16,9 +17,9 @@ ENV_PROJECT_ROOT = os.getenv('SYNTH_PROJ_ROOT')
 if ENV_PROJECT_ROOT:
     PROJECT_ROOT = Path(ENV_PROJECT_ROOT)
 
-# External drive configuration
-EXTERNAL_DRIVE_PATH = os.getenv('SYNTH_EXTERNAL_DRIVE', '/Volumes/Extreme SSD')
-EXTERNAL_DRIVE = Path(EXTERNAL_DRIVE_PATH)
+# External drive configuration (configurable via environment)
+EXTERNAL_DRIVE_PATH = os.getenv('SYNTH_EXTERNAL_DRIVE', '')
+EXTERNAL_DRIVE = Path(EXTERNAL_DRIVE_PATH) if EXTERNAL_DRIVE_PATH else None
 
 # Data directory names (configurable via environment)
 SEGMENTED_AUDIO_DIR = os.getenv('SYNTH_SEGMENTED_AUDIO_DIR', 'segmented_audio')
@@ -27,11 +28,20 @@ SPECTRAL_DATA_DIR = os.getenv('SYNTH_SPECTRAL_DATA_DIR', 'spectral_data')
 NEURAL_OUTPUT_DIR = os.getenv('SYNTH_NEURAL_OUTPUT_DIR', 'neural_output')
 RAW_AUDIO_DIR = os.getenv('SYNTH_RAW_AUDIO_DIR', 'BassVocalDrumGuitar')
 
+# Generation suffix for versioning (configurable via environment)
+DATA_GENERATION_SUFFIX = os.getenv('SYNTH_DATA_GENERATION_SUFFIX', '_gen1')
+
 # External drive paths (with generation suffix for versioning)
-EXTERNAL_SEGMENTED_AUDIO = EXTERNAL_DRIVE / f"{SEGMENTED_AUDIO_DIR}_gen1"
-EXTERNAL_SEGMENTED_STEMS = EXTERNAL_DRIVE / f"{SEGMENTED_STEMS_DIR}_gen1"
-EXTERNAL_SPECTRAL_DATA = EXTERNAL_DRIVE / os.getenv('SYNTH_SPECTRAL_DATA_GEN', f"{SPECTRAL_DATA_DIR}_gen1")
-EXTERNAL_NEURAL_OUTPUT = EXTERNAL_DRIVE / os.getenv('SYNTH_NEURAL_OUTPUT_GEN', f"{NEURAL_OUTPUT_DIR}_gen1")
+if EXTERNAL_DRIVE:
+    EXTERNAL_SEGMENTED_AUDIO = EXTERNAL_DRIVE / f"{SEGMENTED_AUDIO_DIR}{DATA_GENERATION_SUFFIX}"
+    EXTERNAL_SEGMENTED_STEMS = EXTERNAL_DRIVE / f"{SEGMENTED_STEMS_DIR}{DATA_GENERATION_SUFFIX}"
+    EXTERNAL_SPECTRAL_DATA = EXTERNAL_DRIVE / f"{SPECTRAL_DATA_DIR}{DATA_GENERATION_SUFFIX}"
+    EXTERNAL_NEURAL_OUTPUT = EXTERNAL_DRIVE / f"{NEURAL_OUTPUT_DIR}{DATA_GENERATION_SUFFIX}"
+else:
+    EXTERNAL_SEGMENTED_AUDIO = None
+    EXTERNAL_SEGMENTED_STEMS = None
+    EXTERNAL_SPECTRAL_DATA = None
+    EXTERNAL_NEURAL_OUTPUT = None
 
 # Local paths (relative to project root)
 LOCAL_SEGMENTED_AUDIO = PROJECT_ROOT / SEGMENTED_AUDIO_DIR
@@ -50,7 +60,7 @@ def get_data_paths(use_external: bool = True) -> Dict[str, str]:
     Returns:
         dict: Dictionary containing the data paths
     """
-    if use_external and EXTERNAL_DRIVE.exists():
+    if use_external and EXTERNAL_DRIVE and EXTERNAL_DRIVE.exists():
         return {
             'segmented_audio': str(EXTERNAL_SEGMENTED_AUDIO),
             'segmented_stems': str(EXTERNAL_SEGMENTED_STEMS),
@@ -69,7 +79,7 @@ def get_data_paths(use_external: bool = True) -> Dict[str, str]:
 
 def check_external_drive_available() -> bool:
     """Check if the external drive is mounted and accessible."""
-    return EXTERNAL_DRIVE.exists()
+    return EXTERNAL_DRIVE is not None and EXTERNAL_DRIVE.exists()
 
 def get_segmented_audio_path() -> str:
     """Get the path to segmented audio data."""
@@ -107,7 +117,7 @@ def get_project_info() -> Dict[str, str]:
     return {
         'project_root': str(PROJECT_ROOT),
         'external_drive_available': str(check_external_drive_available()),
-        'external_drive_path': str(EXTERNAL_DRIVE),
+        'external_drive_path': str(EXTERNAL_DRIVE) if EXTERNAL_DRIVE else 'N/A',
         'using_external_storage': str(check_external_drive_available()),
         'segmented_audio_path': get_segmented_audio_path(),
         'segmented_stems_path': get_segmented_stems_path(),

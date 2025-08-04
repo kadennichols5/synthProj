@@ -1,125 +1,160 @@
-# Audio Stem Processing and Spectral Analysis Project
+# Synesthetic Audio Visualization System
 
-This project processes audio stems and performs spectral analysis on music tracks, generating detailed spectral data for various musical components.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Unity](https://img.shields.io/badge/Unity-6.0.0.31f1-000000.svg)](https://unity.com)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)](https://apple.com)
 
-## Project Structure
+A comprehensive system that transforms music into dynamic 3D visualizations through advanced audio processing and real-time Unity rendering.
+
+## 🎯 Project Overview
+
+This project demonstrates full-stack development combining:
+- **Audio Processing Pipeline** (Python) - Converts music into spectral data
+- **Real-time Visualization** (Unity) - Renders dynamic 3D visual elements
+
+The system processes audio through spectral analysis and creates responsive 3D visualizations that react to music in real-time, showcasing advanced audio processing, data transformation, and interactive visualization techniques.
+
+## 🏗️ Architecture
 
 ```
-.
-├── python/
-│   ├── config/
-│   │   ├── paths.py                  # Data path configuration
-│   │   └── README.md                 # Configuration documentation
-│   └── src/
-│       ├── process_stems.py          # Main stem processing script
-│       ├── spectral_analysis.py      # Spectral analysis utilities
-│       ├── audio_separation.py       # Audio stem separation functionality
-│       ├── batch_separate_segments.py # Batch processing for audio segments
-│       ├── segment_generator.py      # Generates audio segments from full tracks
-│       ├── gen1_data_cleaning.py     # Data cleaning utilities
-│       ├── neural_network.py         # Neural network implementation
-│       ├── main.py                   # Main entry point
-│       └── __init__.py              # Package initialization
-├── segmented_audio/                  # Symlink to external drive data
-├── segmented_stems/                  # Symlink to external drive data
-└── spectral_data/                   # Symlink to external drive data
+Music Files → Python Pipeline → Spectral Data → Unity Visualization
+     ↓              ↓                ↓              ↓
+  Raw Audio → Stem Separation → Frequency Data → 3D Visuals
 ```
 
-## Data Management
+### Components
 
-### External Drive Setup
-The project is configured to use an external drive for data storage to manage large file sizes efficiently:
+- **[Python Audio Pipeline](./python/)** - Audio processing and spectral analysis
+- **[Unity Visualization](./unityViz/)** - Real-time 3D visual rendering
+- **[Project Architecture](./ARCHITECTURE.md)** - Detailed system documentation
 
-- **External Drive**: `/Volumes/Extreme SSD`
-- **Data Locations**: 
-  - `segmented_audio_gen1/` - Audio segments
-  - `segmented_stems_gen1/` - Separated audio stems
-  - `spectral_data_gen1/` - Spectral analysis results
+## 🚀 Quick Start
 
-### Automatic Path Configuration
-The project uses a centralized path configuration system that:
-- Automatically detects when the external drive is mounted
-- Routes data access to external drive when available
-- Falls back to local paths if external drive is unavailable
-- Maintains backward compatibility through symlinks
+### Prerequisites
+- Python 3.8+
+- Unity 6.0.0.31f1 (macOS)
+- Audio files (MP3/WAV format)
 
-### Usage
-```python
-from python.config.paths import get_segmented_audio_path, get_segmented_stems_path, get_spectral_data_path
+### Installation
 
-# Get configured paths
-audio_path = get_segmented_audio_path()
-stems_path = get_segmented_stems_path()
-spectral_path = get_spectral_data_path()
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/synthProj.git
+   cd synthProj
+   ```
+
+2. **Setup Python Pipeline**
+   ```bash
+   cd python
+   pip install -r requirements.txt
+   pip install demucs  # For audio separation
+   ```
+
+3. **Setup Unity Project**
+   - Open `unityViz/SynthAIViz/` in Unity 6.0.0.31f1
+   - Import required packages (see [Unity README](./unityViz/README.md))
+
+### Basic Usage
+
+1. **Process Audio Files**
+   ```bash
+   cd python
+   python src/main.py --mode full --input /path/to/music
+   ```
+
+2. **Run Unity Visualization**
+   - Open the Unity project
+   - Load spectral data files
+   - Press Play to see real-time visualization
+
+## 📁 Project Structure
+
+```
+synthProj/
+├── python/                    # Audio processing pipeline
+│   ├── src/                   # Core processing scripts
+│   ├── config/                # Configuration and paths
+│   ├── examples/              # Usage examples
+│   └── README.md              # Python component documentation
+├── unityViz/                  # Unity visualization project
+│   └── SynthAIViz/           # Unity project files
+│       ├── Assets/Scripts/    # C# visualization scripts
+│       └── README.md          # Unity component documentation
+├── segmented_audio/           # Generated audio segments
+├── segmented_stems/           # Separated audio components
+├── spectral_data/             # Spectral analysis results
+├── ARCHITECTURE.md            # Detailed system architecture
+└── README.md                  # This file
 ```
 
-## Features
+## 🔧 Key Features
 
-- Processes audio stems (vocals, drums, bass, other) from music tracks
-- Supports both MP3 and WAV file formats
-- Performs spectral analysis on audio segments
-- Generates detailed spectral data including:
-  - Magnitudes
-  - Phases
-  - Frequency bins
-  - Time information
-  - Sample rates
-- Automatic external drive detection and data routing
-- Centralized path configuration
+### Python Pipeline
+- **Audio Segmentation** - Breaks tracks into manageable segments
+- **Stem Separation** - Isolates vocals, drums, bass, and other instruments
+- **Spectral Analysis** - Converts audio to frequency-domain data
+- **Batch Processing** - Handles large audio collections efficiently
 
-## Requirements
+### Unity Visualization
+- **Modular Architecture** - Component-based design for maintainability
+- **Real-time Rendering** - Dynamic 3D visual elements
+- **Audio Responsiveness** - Visuals react to spectral data changes
+- **Performance Optimized** - Efficient rendering for smooth visualization
 
-- Python 3.x
-- External drive mounted at `/Volumes/Extreme SSD` (for optimal performance)
-- Required Python packages:
-  - numpy
-  - soundfile
-  - pydub
-  - (Additional dependencies listed in requirements.txt)
+## 🎨 Visualization Examples
 
-## Output Format
+The Unity component creates various visual effects:
+- **Strand Visualization** - Dynamic audio trails
+- **Particle Systems** - Responsive particle effects
+- **Mesh Deformation** - Real-time geometry changes
+- **Color Transitions** - Smooth visual parameter changes
 
-The spectral data is saved in JSON format with the following structure:
-```json
-{
-    "segment_name": "song_name",
-    "stems": {
-        "vocals": [...],
-        "drums": [...],
-        "bass": [...],
-        "other": [...]
-    }
-}
-```
+## 📊 Data Flow
 
-Each stem contains detailed spectral information including:
-- Time markers
-- Magnitude values
-- Phase values
-- Frequency bins
-- Sample rate information
+1. **Input**: Raw audio files (MP3/WAV)
+2. **Segmentation**: Audio broken into segments with two sampling strategies:
+   - **70% Symmetric**: Regular stride-based sampling (5-second segments, 2-second overlap)
+   - **30% Random**: Random start positions and lengths (3-7 second segments)
+3. **Separation**: Each segment split into 4 stems (vocals, drums, bass, other)
+4. **Analysis**: STFT spectral analysis on each stem
+5. **Output**: JSON files with frequency-domain data
+6. **Visualization**: Unity reads JSON data for real-time rendering
 
-## Data Processing Pipeline
+## 🛠️ Configuration
 
-1. **Audio Segmentation**: Full tracks are segmented into smaller chunks
-2. **Stem Separation**: Each segment is separated into individual stems (vocals, drums, bass, other)
-3. **Spectral Analysis**: Detailed spectral analysis is performed on each stem
-4. **Data Storage**: Results are stored on external drive with `_gen1` suffix
+The system supports flexible configuration:
+- **Local Storage**: Default local file storage
+- **External Storage**: Configurable external drive support
+- **Environment Variables**: Customizable paths and settings
+- **Generation Versioning**: Support for multiple data versions
 
-## Notes
+## 📚 Documentation
 
-- The project currently processes a variety of music tracks including:
-  - Classic rock songs
-  - Alternative rock
-  - Indie tracks
-- Each processed file generates spectral data files ranging from ~96MB to ~182MB, ~300GB in total
-- The spectral analysis preserves important audio characteristics while providing detailed frequency domain information
-- Data is automatically stored on external drive when available to manage storage efficiently
-- Symlinks in the project directory provide seamless access to external data
+- **[Python Pipeline](./python/README.md)** - Detailed audio processing documentation
+- **[Unity Visualization](./unityViz/README.md)** - Visualization component guide
+- **[System Architecture](./ARCHITECTURE.md)** - Complete technical architecture
 
-## License
+## 🎓 Learning Value
 
-MIT License - Copyright (c) 2025 Kaden Nichols
+This project demonstrates:
+- **Audio Signal Processing** - STFT, spectral analysis, stem separation
+- **Data Pipeline Design** - Modular, configurable processing systems
+- **Unity Development** - Component-based architecture, real-time rendering
+- **System Integration** - Python-to-Unity data flow
+- **Performance Optimization** - Efficient audio and visual processing
+
+## 🤝 Contributing
+
+This is a portfolio project demonstrating full-stack audio visualization development. The modular architecture makes it easy to extend and modify individual components.
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
+---
+
+**Built with ❤️ for shapes and sounds**
 
 
 
