@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 8651372412807551505}
   - component: {fileID: -6586538222491906554}
   - component: {fileID: 3878410060062905942}
+  - component: {fileID: -3233459830004073001}
   m_Layer: 0
   m_Name: AudioStrandPrefab
   m_TagString: Untagged
@@ -482,6 +483,20 @@ MonoBehaviour:
   maxStrandLength: 50
   maxStrandPoints: 100
 --- !u!114 &3878410060062905942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2257189605057551042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8317a9be25a64b9587494320c7afab8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxStrandLength: 50
+  maxStrandPoints: 100
+--- !u!114 &-3233459830004073001
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
