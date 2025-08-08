@@ -732,6 +732,9 @@ public class SoundVisualizer : MonoBehaviour
     
     void OnGUI()
     {
+
+        GUI.color = Color.black;
+        
         GUILayout.BeginArea(new Rect(10, 10, 400, 280));
 
         GUILayout.Label($"Synth Vis - {(isPlaying ? "Playing" : "Paused")}");
